@@ -1,14 +1,8 @@
 import streamlit as st
-import pyttsx3
+from gtts import gTTS
+from io import BytesIO
 
 def text_to_speech_app():
-    # Initialize the TTS engine
-    engine = pyttsx3.init()
-
-    # Set properties for the TTS engine (optional)
-    engine.setProperty('volume', 0.9)
-    engine.setProperty('rate', 150)  # Adjust the speech rate as needed
-
     # Get user input text through a text area
     text_to_speech = st.text_area("Enter the text you want to convert to speech:")
 
@@ -16,21 +10,16 @@ def text_to_speech_app():
     if st.button("Generate Audio"):
         # Check if the input text is not empty
         if text_to_speech.strip() != "":
-            engine.say(text_to_speech)
-            engine.runAndWait()
-            st.audio(get_audio_file(text_to_speech), format='audio/wav')
+            audio_data = get_audio_data(text_to_speech)
+            st.audio(audio_data, format='audio/mpeg')
 
-def get_audio_file(text_to_speech):
-    # Initialize the TTS engine
-    engine = pyttsx3.init()
-
-    # You can customize the filename and path for saving the audio file
-    filename = 'text_to_speech_output.wav'
-
-    # Save the TTS audio file
-    engine.save_to_file(text_to_speech, filename)
-    engine.runAndWait()
-    return filename
+def get_audio_data(text_to_speech):
+    # Generate audio using gTTS
+    tts = gTTS(text=text_to_speech, lang='en')
+    audio_stream = BytesIO()
+    tts.write_to_fp(audio_stream)
+    audio_stream.seek(0)
+    return audio_stream
 
 if __name__ == '__main__':
     text_to_speech_app()
